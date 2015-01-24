@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"strings"
+	"time"
 
 	"github.com/ninjasphere/go-ninja/api"
 	"github.com/ninjasphere/go-ninja/logger"
@@ -43,11 +44,16 @@ func (d *Driver) Start(_ interface{}) error {
 
 	ip := strings.TrimSpace(string(ipB))
 
+	if ip == "SETME" {
+		time.Sleep(time.Second * 5)
+		log.Fatalf("You must set the ip of the tv in tv.txt!")
+	}
+
 	log.Infof("Temporary: Using hardcoded IP address: %s", ip)
 
-	p, err := NewMediaPlayer(d, d.Conn, ip)
+	_, err = NewMediaPlayer(d, d.Conn, ip)
 
 	//p.applyPlayPause(false)
 
-	return nil
+	return err
 }
