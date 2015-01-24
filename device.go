@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/ninjasphere/go-ninja/api"
 	"github.com/ninjasphere/go-ninja/channels"
 	"github.com/ninjasphere/go-ninja/devices"
@@ -14,7 +16,7 @@ type MediaPlayer struct {
 }
 
 func NewMediaPlayer(driver ninja.Driver, conn *ninja.Connection, ip string) (*MediaPlayer, error) {
-	name := "Samsung Smart TV"
+	name := fmt.Sprintf("Samsung TV: %s", ip)
 
 	player, err := devices.CreateMediaPlayerDevice(driver, &model.Device{
 		NaturalID:     ip,
