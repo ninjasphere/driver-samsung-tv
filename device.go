@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/ninjasphere/go-ninja/api"
-	"github.com/ninjasphere/go-ninja/channels"
 	"github.com/ninjasphere/go-ninja/devices"
 	"github.com/ninjasphere/go-ninja/model"
 )
@@ -38,8 +37,6 @@ func NewMediaPlayer(driver ninja.Driver, conn *ninja.Connection, ip string) (*Me
 		ip:     ip,
 	}
 
-	player.ApplyVolume = device.applyVolume // TODO: Remove me!
-
 	player.ApplyVolumeUp = device.applyVolumeUp
 	player.ApplyVolumeDown = device.applyVolumeDown
 	player.ApplyToggleMuted = device.applyToggleMuted
@@ -55,43 +52,32 @@ func NewMediaPlayer(driver ninja.Driver, conn *ninja.Connection, ip string) (*Me
 	return device, nil
 }
 
-// TODO: Remove me! Just needed till led controller is better
-func (d *MediaPlayer) applyVolume(state *channels.VolumeState) error {
-	d.player.Log().Infof("applyVolume called, volume %v", state)
-
-	if *state.Level > 0 && d.lastVolume == 0 {
-		return sendCommand(d.ip, "KEY_MUTE")
-	}
-
-	if *state.Level == 0 && d.lastVolume > 0 {
-		return sendCommand(d.ip, "KEY_MUTE")
-	}
-
-	// Do nothing for now
-	return nil
-}
-
 func (d *MediaPlayer) applyPlayPause(play bool) error {
 	if play {
-		return sendCommand(d.ip, "KEY_PLAY")
+		go sendCommand(d.ip, "KEY_PLAY")
+	} else {
+		go sendCommand(d.ip, "KEY_PAUSE")
 	}
-	return sendCommand(d.ip, "KEY_PAUSE")
+	return nil
 }
 
 func (d *MediaPlayer) applyToggleMuted() error {
 	d.player.Log().Infof("applyToggleMuted called")
 
-	return sendCommand(d.ip, "KEY_MUTE")
+	go sendCommand(d.ip, "KEY_MUTE")
+	return nil
 }
 
 func (d *MediaPlayer) applyVolumeUp() error {
 	d.player.Log().Infof("applyVolumeUp called")
 
-	return sendCommand(d.ip, "KEY_VOLUP")
+	go sendCommand(d.ip, "KEY_VOLUP")
+	return nil
 }
 
 func (d *MediaPlayer) applyVolumeDown() error {
 	d.player.Log().Infof("applyVolumeDown called")
 
-	return sendCommand(d.ip, "KEY_VOLDOWN")
+	go sendCommand(d.ip, "KEY_VOLDOWN")
+	return nil
 }
