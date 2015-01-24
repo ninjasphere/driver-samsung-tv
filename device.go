@@ -38,8 +38,12 @@ func NewMediaPlayer(driver ninja.Driver, conn *ninja.Connection, ip string) (*Me
 		ip:     ip,
 	}
 
-	player.ApplyVolume = device.applyVolume
-	if err := player.EnableVolumeChannel(true); err != nil {
+	player.ApplyVolume = device.applyVolume // TODO: Remove me!
+
+	player.ApplyVolumeUp = device.applyVolumeUp
+	player.ApplyVolumeDown = device.applyVolumeDown
+	player.ApplyToggleMuted = device.applyToggleMuted
+	if err := player.EnableVolumeChannel(false); err != nil {
 		player.Log().Fatalf("Failed to enable volume channel: %s", err)
 	}
 
@@ -51,13 +55,7 @@ func NewMediaPlayer(driver ninja.Driver, conn *ninja.Connection, ip string) (*Me
 	return device, nil
 }
 
-func (d *MediaPlayer) applyPlayPause(play bool) error {
-	if play {
-		return sendCommand(d.ip, "KEY_PLAY")
-	}
-	return sendCommand(d.ip, "KEY_PAUSE")
-}
-
+// TODO: Remove me! Just needed till led controller is better
 func (d *MediaPlayer) applyVolume(state *channels.VolumeState) error {
 	d.player.Log().Infof("applyVolume called, volume %v", state)
 
@@ -71,4 +69,29 @@ func (d *MediaPlayer) applyVolume(state *channels.VolumeState) error {
 
 	// Do nothing for now
 	return nil
+}
+
+func (d *MediaPlayer) applyPlayPause(play bool) error {
+	if play {
+		return sendCommand(d.ip, "KEY_PLAY")
+	}
+	return sendCommand(d.ip, "KEY_PAUSE")
+}
+
+func (d *MediaPlayer) applyToggleMuted() error {
+	d.player.Log().Infof("applyToggleMuted called")
+
+	return sendCommand(d.ip, "KEY_MUTE")
+}
+
+func (d *MediaPlayer) applyVolumeUp() error {
+	d.player.Log().Infof("applyVolumeUp called")
+
+	return sendCommand(d.ip, "KEY_VOLUP")
+}
+
+func (d *MediaPlayer) applyVolumeDown() error {
+	d.player.Log().Infof("applyVolumeDown called")
+
+	return sendCommand(d.ip, "KEY_VOLDOWN")
 }
