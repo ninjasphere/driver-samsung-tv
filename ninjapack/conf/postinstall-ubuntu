@@ -1,0 +1,2 @@
+/opt/ninjablocks/bin/nservice -q driver-samsung-tv stop || true
+/opt/ninjablocks/bin/nservice -q driver-samsung-tv start || true

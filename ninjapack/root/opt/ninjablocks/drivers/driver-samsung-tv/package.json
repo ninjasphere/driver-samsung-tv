@@ -1,0 +1,10 @@
+{
+  "id": "com.ninjablocks.samsung.tv",
+  "name": "Samsung TV Driver",
+  "version": "0.1.0",
+  "description": "Control of Samsung Smart TVs using IP",
+  "main": "driver-samsung-tv",
+  "author": "Elliot Shepherd <elliot@ninjablocks.com>",
+  "license": "MIT",
+  "maxMemory": 10
+}
