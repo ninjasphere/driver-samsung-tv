@@ -23,9 +23,6 @@ It is basically a port of https://github.com/natalan/samsung-remote
 | volume | [http://schema.ninjablocks.com/protocol/volume](https://github.com/ninjasphere/schemas/blob/master/protocol/volume.json) | set, volumeUp, volumeDown, mute, unmute, toggleMute | |
 | media-control | [http://schema.ninjablocks.com/protocol/media-control](https://github.com/ninjasphere/schemas/blob/master/protocol/media-control.json) | play, pause  | |
 
-#### To Do
-* * Expand support for other applications, especially to pull extra meta-data (i.e. YouTube)
-
 #### Can't Do
 * There is currently no way to get state back from the television.
 
