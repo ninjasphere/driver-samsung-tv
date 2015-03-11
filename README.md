@@ -64,7 +64,7 @@ Then, open the Ninja Sphere phone app and go to the "Add Things" page to add you
 
 If you would like to disable the driver running, connect to the sphere with SSH or a mini-USB cable and run:
 
-	nservice driver-samsung-tv stop &&
+	nservice -q driver-samsung-tv stop &&
 	sudo rm /data/sphere/user-autostart/drivers/driver-samsung-tv
 
 ### Uninstalling the driver
