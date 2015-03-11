@@ -20,7 +20,7 @@ It is basically a port of https://github.com/natalan/samsung-remote
 
 | Name | URI | Supported Events | Supported Methods |
 | ------ | ------------- | ---- | ----------- |
-| volume | [http://schema.ninjablocks.com/protocol/volume](https://github.com/ninjasphere/schemas/blob/master/protocol/volume.json) | set, volumeUp, volumeDown, mute, unmute, toggleMute | |
+| volume | [http://schema.ninjablocks.com/protocol/volume](https://github.com/ninjasphere/schemas/blob/master/protocol/volume.json) | | set, volumeUp, volumeDown, mute, unmute, toggleMute |
 | media-control | [http://schema.ninjablocks.com/protocol/media-control](https://github.com/ninjasphere/schemas/blob/master/protocol/media-control.json) | play, pause  | |
 
 #### Can't Do
