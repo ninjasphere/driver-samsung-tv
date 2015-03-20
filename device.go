@@ -1,30 +1,35 @@
 package main
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/ninjasphere/go-ninja/api"
+	"github.com/ninjasphere/go-ninja/config"
 	"github.com/ninjasphere/go-ninja/devices"
 	"github.com/ninjasphere/go-ninja/model"
+	"github.com/ninjasphere/go-samsung-tv"
 )
 
-type MediaPlayer struct {
-	player     *devices.MediaPlayerDevice
-	ip         string
-	lastVolume float64
+type Device struct {
+	devices.MediaPlayerDevice
+	tv *samsung.TV
 }
 
-func NewMediaPlayer(driver ninja.Driver, conn *ninja.Connection, ip string) (*MediaPlayer, error) {
-	name := fmt.Sprintf("Samsung TV: %s", ip)
+func (d *Device) updateHost(host string) {
+	d.tv.Host = host
+}
+
+func newDevice(driver ninja.Driver, conn *ninja.Connection, cfg *TVConfig) (*Device, error) {
 
 	player, err := devices.CreateMediaPlayerDevice(driver, &model.Device{
-		NaturalID:     ip,
+		NaturalID:     cfg.ID,
 		NaturalIDType: "samsung-tv",
-		Name:          &name,
+		Name:          &cfg.Name,
 		Signatures: &map[string]string{
 			"ninja:manufacturer": "Samsung",
 			"ninja:productName":  "Smart TV",
 			"ninja:thingType":    "mediaplayer",
+			"ip:mac":             cfg.ID,
 		},
 	}, conn)
 
@@ -32,52 +37,60 @@ func NewMediaPlayer(driver ninja.Driver, conn *ninja.Connection, ip string) (*Me
 		return nil, err
 	}
 
-	device := &MediaPlayer{
-		player: player,
-		ip:     ip,
+	samsung.EnableLogging = true
+
+	tv := samsung.TV{
+		Host:            cfg.Host,
+		ApplicationID:   config.MustString("userId"),
+		ApplicationName: "Ninja Sphere         ",
 	}
 
-	player.ApplyVolumeUp = device.applyVolumeUp
-	player.ApplyVolumeDown = device.applyVolumeDown
-	player.ApplyToggleMuted = device.applyToggleMuted
+	// Volume Channel
+	player.ApplyVolumeUp = func() error {
+		return tv.SendCommand("KEY_VOLUP")
+	}
+
+	player.ApplyVolumeDown = func() error {
+		return tv.SendCommand("KEY_VOLDOWN")
+	}
+
+	player.ApplyToggleMuted = func() error {
+		return tv.SendCommand("KEY_MUTE")
+	}
+
 	if err := player.EnableVolumeChannel(false); err != nil {
 		player.Log().Fatalf("Failed to enable volume channel: %s", err)
 	}
 
-	player.ApplyPlayPause = device.applyPlayPause
+	// Media Control Channel
+	player.ApplyPlayPause = func(play bool) error {
+		if play {
+			return tv.SendCommand("KEY_PLAY")
+		}
+
+		return tv.SendCommand("KEY_PAUSE")
+	}
+
 	if err := player.EnableControlChannel([]string{}); err != nil {
 		player.Log().Fatalf("Failed to enable control channel: %s", err)
 	}
 
-	return device, nil
-}
-
-func (d *MediaPlayer) applyPlayPause(play bool) error {
-	if play {
-		go sendCommand(d.ip, "KEY_PLAY")
-	} else {
-		go sendCommand(d.ip, "KEY_PAUSE")
+	// On-off Channel
+	player.ApplyOff = func() error {
+		return tv.SendCommand("KEY_POWEROFF")
 	}
-	return nil
-}
 
-func (d *MediaPlayer) applyToggleMuted() error {
-	d.player.Log().Infof("applyToggleMuted called")
+	if err := player.EnableOnOffChannel("state"); err != nil {
+		player.Log().Fatalf("Failed to enable control channel: %s", err)
+	}
 
-	go sendCommand(d.ip, "KEY_MUTE")
-	return nil
-}
+	go func() {
 
-func (d *MediaPlayer) applyVolumeUp() error {
-	d.player.Log().Infof("applyVolumeUp called")
+		// Continuous updates as TV goes online and offline
+		for online := range tv.OnlineState(time.Second * 5) {
+			player.UpdateOnOffState(online)
+		}
+	}()
 
-	go sendCommand(d.ip, "KEY_VOLUP")
-	return nil
-}
-
-func (d *MediaPlayer) applyVolumeDown() error {
-	d.player.Log().Infof("applyVolumeDown called")
-
-	go sendCommand(d.ip, "KEY_VOLDOWN")
-	return nil
+	return &Device{*player, &tv}, nil
 }
