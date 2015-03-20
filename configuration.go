@@ -17,9 +17,12 @@ func (c *configService) Configure(request *model.ConfigurationRequest) (*suit.Co
 
 	switch request.Action {
 	case "list":
-		fallthrough
-	case "":
 		return c.list()
+	case "":
+		if len(c.driver.config.TVs) > 0 {
+			return c.list()
+		}
+		fallthrough
 	case "new":
 		return c.edit(TVConfig{})
 	case "edit":
