@@ -12,6 +12,15 @@ type configService struct {
 	driver *Driver
 }
 
+func (c *configService) GetActions(request *model.ConfigurationRequest) (*[]suit.ReplyAction, error) {
+	return &[]suit.ReplyAction{
+		suit.ReplyAction{
+			Name:  "",
+			Label: "Samsung TVs",
+		},
+	}, nil
+}
+
 func (c *configService) Configure(request *model.ConfigurationRequest) (*suit.ConfigurationScreen, error) {
 	log.Infof("Incoming configuration request. Action:%s Data:%s", request.Action, string(request.Data))
 
